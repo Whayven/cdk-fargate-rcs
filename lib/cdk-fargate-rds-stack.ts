@@ -10,9 +10,6 @@ import {Cluster, ContainerImage, FargateTaskDefinition, LogDriver, Secret} from 
 
 import path = require('path');
 
-
-
-
 export class CdkFargateRdsStack extends cdk.Stack {
     constructor(scope: cdk.App, id: string, props?: cdk.StackProps) {
         super(scope, id, props);
@@ -51,13 +48,6 @@ export class CdkFargateRdsStack extends cdk.Stack {
         });
 
         const accessKey = new iam.AccessKey(this, 'AccessKey', {user});
-
-        const taskRole = new iam.Role(this, 'task', {
-            assumedBy: new iam.ServicePrincipal('ecs-tasks.amazonaws.com'),
-            managedPolicies: [
-                iam.ManagedPolicy.fromAwsManagedPolicyName('AmazonS3FullAccess'),
-            ],
-        });
 
         // create s3 bucket for media storage
         const bucket = new Bucket(this, 'bucket', {
@@ -122,6 +112,12 @@ export class CdkFargateRdsStack extends cdk.Stack {
 
         const cluster = new Cluster(this, 'cluster', {vpc});
 
+        const taskRole = new iam.Role(this, 'task', {
+            assumedBy: new iam.ServicePrincipal('ecs-tasks.amazonaws.com'),
+            managedPolicies: [
+                iam.ManagedPolicy.fromAwsManagedPolicyName('AmazonS3FullAccess'),
+            ],
+        });
         const taskDefinition = new FargateTaskDefinition(this, 'fargateTask', {
             cpu: 512,
             memoryLimitMiB: 2048,
